@@ -3,18 +3,18 @@ import random
 
 origin = (0, 0, 0)
 edge = (200, 200, 200)
-baseRadius = 12
+baseRadius = 10
 height = 100
-numberOfFins = 40
-widthScale = baseRadius * 2 # value is distance that fins stick out from base
+numberOfFins = 30
+widthScale = baseRadius * 4 # value is distance that fins stick out from base
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
 numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
-lumpScale = .5 #not 0
-twist = 30 #degree of twist in degrees
+lumpScale = 2 #not 0
+twist = 180 #degree of twist in degrees
 
 isBackForth = True #do you want it to switch directions in the rotation?
 
@@ -26,7 +26,7 @@ def generatePosOrNeg(n, p):# change positive and negative values here to weight 
         if localRandom != 0:
             localRandom = localRandom / abs(localRandom)
             return localRandom
-            
+
 
 def createBase():
     base = rs.AddCircle(origin, baseRadius)
@@ -58,7 +58,7 @@ def createWalls(lumpy = False, backForth = False):
 
         backForthDir = 1
         for i in range(0, numberOfLumps):
-            localLumpScale = random.uniform(0.8, 1.2) # this variable affects the lumpiness of the object.
+            localLumpScale = random.uniform(0.75, 1.25) # this variable affects the lumpiness of the object.
             
             if backForth:
                 backForthDir = generatePosOrNeg(-1,1)

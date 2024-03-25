@@ -6,11 +6,13 @@ edge = (200, 200, 200)
 baseRadius = 8
 height = 100
 numberOfFins = 40
-widthScale = baseRadius * 1 # value is distance that fins stick out from base
-twist = 0 #degree of twist in degrees
+widthScale = baseRadius * 3 # value is distance that fins stick out from base
+twist = 180 #degree of twist in degrees
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
+
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
 numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
+lumpScale = 0.1 #not 0
 
 
 
@@ -35,22 +37,36 @@ def createBase():
     wavyBase = rs.AddCurve(pointsArray)
     rs.DeleteObjects(pointsArray)
     curvesToLoft.append(wavyBase) #add curves between top and bottom below this one and before the top is added i.e. if there ends up being a twist
+    return wavyBase
 
-def createTop(lumpy = False):
+def createWalls(lumpy = False):
     if lumpy == True:
+        midCurveList = []
+        midCurveList.append(curvesToLoft[0])
+        
         for i in range(0, numberOfLumps):
-            midCurves = rs.CopyObject(curvesToLoft[i], [0, 0, (height / numberOfLumps)])
-            curvesToLoft.append(midCurves)
+            midCurve = rs.CopyObject(midCurveList[i], [0, 0, (height / numberOfLumps)])
+            midCurveOffset = rs.OffsetCurve(midCurve, edge, ((random.random() + 1) * lumpScale))
+            rs.RotateObject(midCurve, origin, twist / numberOfLumps)
+            midCurveList.append(midCurve)
+            curvesToLoft.append(midCurveOffset)
+        
+        #for i in range(1, len(midCurveList)):
+            #curvesToLoft.append(midCurveList[i])
+            #rs.DeleteObject(midCurve)
+
     else:
         wavyTop = rs.CopyObject(curvesToLoft[0], [0, 0, height])
         rs.RotateObject(wavyTop, origin, twist)
         curvesToLoft.append(wavyTop)
+
     return
 
 def loftAndCap():
     shell = rs.AddLoftSrf(curvesToLoft)
     rs.CapPlanarHoles(shell)
 
-createBase()
-createTop(isLumpy)
+bottom = createBase()
+createWalls(isLumpy)
+print(curvesToLoft)
 loftAndCap()

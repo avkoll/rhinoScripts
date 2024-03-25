@@ -6,18 +6,27 @@ edge = (200, 200, 200)
 baseRadius = 12
 height = 100
 numberOfFins = 40
-widthScale = baseRadius * 3 # value is distance that fins stick out from base
+widthScale = baseRadius * 2 # value is distance that fins stick out from base
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
 numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
-lumpScale = 1 #not 0
-twist = 120 #degree of twist in degrees
+lumpScale = .5 #not 0
+twist = 30 #degree of twist in degrees
 
-switchBack = False #do you want it to switch directions in the rotation?
+isBackForth = True #do you want it to switch directions in the rotation?
 
+
+def generatePosOrNeg(n, p):# change positive and negative values here to weight in either direction
+    localRandom = 1
+    while True:
+        localRandom = random.randint(n, p) 
+        if localRandom != 0:
+            localRandom = localRandom / abs(localRandom)
+            return localRandom
+            
 
 def createBase():
     base = rs.AddCircle(origin, baseRadius)
@@ -43,37 +52,31 @@ def createBase():
     return wavyBase
 
 def createWalls(lumpy = False, backForth = False):
+    midCurveList.append(curvesToLoft[0])
+    
     if lumpy == True:
-        midCurveList.append(curvesToLoft[0])
-        
+
+        backForthDir = 1
         for i in range(0, numberOfLumps):
-            localReversedAmount = 1
+            localLumpScale = random.uniform(0.8, 1.2) # this variable affects the lumpiness of the object.
+            
             if backForth:
-                #this applies a random direction to the rotate function. 
-                while True:
-                    randomValue = random.randint(-1, 4) # change positive and negative values here to weight in either direction
-                    if randomValue != 0:
-                        localReversedAmount = randomValue / abs(randomValue)
-                        break
+                backForthDir = generatePosOrNeg(-1,1)
 
             #raise curve below it
             midCurve = rs.CopyObject(midCurveList[i], [0, 0, (height / numberOfLumps)])
             #widen curve then rotate it
-            midCurveOffset = rs.OffsetCurve(midCurve, edge, (random.randint(1,10) * lumpScale))
-            midCurveOffset = rs.RotateObject(midCurve, origin, (twist / numberOfLumps) * localReversedAmount)
+            #midCurveOffset = rs.OffsetCurve(midCurve, edge, (random.randint(1,10) * lumpScale))
+            midCurveOffset = rs.ScaleObject(midCurve, origin, [localLumpScale, localLumpScale, 1])
+            midCurveOffset = rs.RotateObject(midCurve, origin, (twist / numberOfLumps * backForthDir))
             #add the two curves to a list
             midCurveList.append(midCurve)
             curvesToLoft.append(midCurveOffset)
 
-
-        #for i in range(1, len(midCurveList)):
-            #curvesToLoft.append(midCurveList[i])
-            #rs.DeleteObject(midCurve)
-
     else:
         wavyTop = rs.CopyObject(curvesToLoft[0], [0, 0, height])
         rs.RotateObject(wavyTop, origin, twist)
-        curvesToLoft.append(wavyTop)
+        midCurveList.append(wavyTop)
     return
 
 def loftAndCap():
@@ -91,6 +94,6 @@ def deleteAllCurves():
         print("No curves found")
 
 bottom = createBase()
-createWalls(isLumpy, switchBack)
+createWalls(isLumpy, isBackForth)
 loftAndCap()
-#deleteAllCurves()
+deleteAllCurves()

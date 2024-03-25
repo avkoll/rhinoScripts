@@ -12,15 +12,15 @@ import random
 
 origin = (0, 0, 0)
 edge = (200, 200, 200)
-baseRadius = 8
+baseRadius = 12
 height = 100
 numberOfFins = 40
-widthScale = baseRadius * 1 # value is distance that fins stick out from base
-twist = 0 #degree of twist in degrees
+widthScale = baseRadius * 2 # value is distance that fins stick out from base
+twist = 90 #degree of twist in degrees
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
 numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
-lumpScale = 10
+lumpScale = 5
 
 
 
@@ -51,7 +51,7 @@ def createWalls(lumpy = False):
         for i in range(0, numberOfLumps):
             midCurve = rs.CopyObject(curvesToLoft[i], [0, 0, (height / numberOfLumps)])
             midCurveOffset = rs.OffsetCurve(midCurve, edge, (random.random() * lumpScale))
-            
+            midCurveOffset = rs.RotateObject(midCurveOffset, origin, twist)
             curvesToLoft.append(midCurveOffset)
             rs.DeleteObject(midCurve)
             

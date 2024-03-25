@@ -3,20 +3,24 @@ import random
 
 origin = (0, 0, 0)
 edge = (200, 200, 200)
-baseRadius = 10
+socketHeight = 5
+baseRadius = 20
 height = 100
-numberOfFins = 30
-widthScale = baseRadius * 4 # value is distance that fins stick out from base
+numberOfFins = 42
+widthScale = baseRadius * 0.1 # value is distance that fins stick out from base
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
-numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
-lumpScale = 2 #not 0
-twist = 180 #degree of twist in degrees
+numberOfLumps = 8 #number of extra rings between top and bottom to create wavy effect
+lumpScale = 0.1 #not 0
+twist = 30 #degree of twist in degrees
 
 isBackForth = True #do you want it to switch directions in the rotation?
+
+#inner wall gap thickness scale, used in loft and cap function
+shellThickness = 0.9
 
 
 def generatePosOrNeg(n, p):# change positive and negative values here to weight in either direction
@@ -58,10 +62,10 @@ def createWalls(lumpy = False, backForth = False):
 
         backForthDir = 1
         for i in range(0, numberOfLumps):
-            localLumpScale = random.uniform(0.75, 1.25) # this variable affects the lumpiness of the object.
+            localLumpScale = random.uniform(0.75, 1.25) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
             
             if backForth:
-                backForthDir = generatePosOrNeg(-1,1)
+                backForthDir = generatePosOrNeg(-1,4)
 
             #raise curve below it
             midCurve = rs.CopyObject(midCurveList[i], [0, 0, (height / numberOfLumps)])
@@ -80,8 +84,22 @@ def createWalls(lumpy = False, backForth = False):
     return
 
 def loftAndCap():
+    # Create shell and generate solid with wall thickness based on the value of shellThickness variable as percentage of radius
     shell = rs.AddLoftSrf(midCurveList)
+    innerShell = rs.CopyObject(shell)
+    innerShell = rs.ScaleObject(innerShell, origin, [shellThickness, shellThickness, 1])
     rs.CapPlanarHoles(shell)
+    shell = rs.BooleanIntersection([shell], [innerShell])
+    
+    # Add base with thickness of height of socketHeight
+    # this generates a base with height of (Height / numberOfLumps) then cuts top off at height of socketHeight
+    socketBase = rs.AddPlanarSrf(midCurveList[0])
+    socketBase = rs.AddLoftSrf([midCurveList[0], midCurveList[1]])
+    socketBase = rs.ScaleObject(socketBase, origin, [shellThickness, shellThickness, 1])
+    rs.CapPlanarHoles(socketBase)
+    socketBaseCutter = rs.AddCylinder([0, 0, socketHeight], [0, 0, 200], 200)
+    socketBase = rs.BooleanDifference([socketBase], [socketBaseCutter], True)
+    shell = rs.BooleanUnion([shell, socketBase])
 
 def deleteAllCurves():
     # find all curves in doc that are not in locked layer

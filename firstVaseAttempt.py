@@ -3,24 +3,24 @@ import random
 
 origin = (0, 0, 0)
 edge = (200, 200, 200)
-socketHeight = 5
+socketHeight = 0.75 # *IMPORTANT* socketHeight needs to be < BottomThickness in the slicer or printer will make spagheto
 baseRadius = 37.5
 height = 100
 numberOfFins = 32 # has to be greater than 2 or crash, higher = slower generation time but will complete.
-widthScale = baseRadius * 0.5 # value is distance that fins stick out from base
+widthScale = baseRadius * 0.1 # value is distance that fins stick out from base
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
-isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
+isLumpy = False #true adds curves between top and bottom at intervals == numberOfLumps
 numberOfLumps = 8 #number of extra rings between top and bottom to create wavy effect
-lumpScale = 1.5 #not 0
-twist = 90 #degree of twist in degrees
+lumpScale = 0.1 #not 0
+twist = 0 #degree of twist in degrees
 
 isBackForth = True #do you want it to switch directions in the rotation?
 
 #inner wall gap thickness scale, used in loft and cap function
-shellThickness = 0.9
+shellThickness = 0.75
 
 
 def generatePosOrNeg(n, p):# change positive and negative values here to weight in either direction
@@ -94,7 +94,7 @@ def loftAndCap():
     # Add base with thickness of height of socketHeight
     # this generates a base with height of (Height / numberOfLumps) then cuts top off at height of socketHeight
     socketBase = rs.AddLoftSrf([midCurveList[0], midCurveList[1]])
-    socketBase = rs.ScaleObject(socketBase, origin, [shellThickness * 1, shellThickness * 1, 1])
+    socketBase = rs.ScaleObject(socketBase, origin, [shellThickness * 1.01, shellThickness * 1.01, 1])
     rs.CapPlanarHoles(socketBase)
     socketBaseCutter = rs.AddCylinder([0, 0, socketHeight], [0, 0, 200], 200)
     socketBase = rs.BooleanDifference([socketBase], [socketBaseCutter], True)

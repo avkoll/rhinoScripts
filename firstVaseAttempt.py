@@ -4,17 +4,17 @@ import random
 origin = (0, 0, 0)
 edge = (200, 200, 200)
 socketHeight = 5
-baseRadius = 20
+baseRadius = 37.5
 height = 100
-numberOfFins = 20
-widthScale = baseRadius * 0.1 # value is distance that fins stick out from base
+numberOfFins = 32 # has to be greater than 2 or crash, higher = slower generation time but will complete.
+widthScale = baseRadius * 0.5 # value is distance that fins stick out from base
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
 numberOfLumps = 8 #number of extra rings between top and bottom to create wavy effect
-lumpScale = 1 #not 0
+lumpScale = 1.5 #not 0
 twist = 90 #degree of twist in degrees
 
 isBackForth = True #do you want it to switch directions in the rotation?
@@ -84,7 +84,7 @@ def createWalls(lumpy = False, backForth = False):
     return
 
 def loftAndCap():
-    # Create shell and generate solid with wall thickness based on the value of shellThickness variable as percentage of radius
+    # Create shell and generate solid with wall thickness based on the value of shellThickness variable -> percentage of radius of inner shell
     shell = rs.AddLoftSrf(midCurveList)
     innerShell = rs.CopyObject(shell)
     innerShell = rs.ScaleObject(innerShell, origin, [shellThickness, shellThickness, 1])
@@ -94,11 +94,13 @@ def loftAndCap():
     # Add base with thickness of height of socketHeight
     # this generates a base with height of (Height / numberOfLumps) then cuts top off at height of socketHeight
     socketBase = rs.AddLoftSrf([midCurveList[0], midCurveList[1]])
-    socketBase = rs.ScaleObject(socketBase, origin, [shellThickness * 1.1, shellThickness * 1.1, 1])
+    socketBase = rs.ScaleObject(socketBase, origin, [shellThickness * 1, shellThickness * 1, 1])
     rs.CapPlanarHoles(socketBase)
     socketBaseCutter = rs.AddCylinder([0, 0, socketHeight], [0, 0, 200], 200)
     socketBase = rs.BooleanDifference([socketBase], [socketBaseCutter], True)
     shell = rs.BooleanUnion([shell, socketBase])
+    #TODO redo above code so it fucking works...
+    #truncate and generate solid from what has already been generated as shell
 
 def deleteAllCurves():
     # find all curves in doc that are not in locked layer

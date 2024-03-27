@@ -4,33 +4,32 @@ import random
 origin = (0, 0, 0)
 edge = (200, 200, 200)
 socketHeight = 0.75 # *IMPORTANT* socketHeight needs to be < BottomThickness in the slicer or printer will make spagheto
-baseRadius = 37.5
+baseRadius = 25
 height = 100
-numberOfFins = 32 # has to be greater than 2 or crash, higher = slower generation time but will complete.
+numberOfFins = 36 # has to be greater than 2 or crash, higher = slower generation time but will complete.
 widthScale = baseRadius * 0.1 # value is distance that fins stick out from base
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
-isLumpy = False #true adds curves between top and bottom at intervals == numberOfLumps
-numberOfLumps = 8 #number of extra rings between top and bottom to create wavy effect
-lumpScale = 0.1 #not 0
-twist = 0 #degree of twist in degrees
+isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
+numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
+lumpScale = 0.25 #not 0
+twist = 90 #degree of twist in degrees
 
 isBackForth = True #do you want it to switch directions in the rotation?
 
 #inner wall gap thickness scale, used in loft and cap function
 shellThickness = 0.75
 
-
-def generatePosOrNeg(n, p):# change positive and negative values here to weight in either direction
+# change positive and negative values here to weight in either direction
+def generatePosOrNeg(n, p):
     localRandom = 1
     while True:
         localRandom = random.randint(n, p) 
         if localRandom != 0:
             localRandom = localRandom / abs(localRandom)
             return localRandom
-
 
 def createBase():
     base = rs.AddCircle(origin, baseRadius)
@@ -65,7 +64,7 @@ def createWalls(lumpy = False, backForth = False):
             localLumpScale = random.uniform(0.75, 1.25) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
             
             if backForth:
-                backForthDir = generatePosOrNeg(-1,4)
+                backForthDir = generatePosOrNeg(-1,2)
 
             #raise curve below it
             midCurve = rs.CopyObject(midCurveList[i], [0, 0, (height / numberOfLumps)])

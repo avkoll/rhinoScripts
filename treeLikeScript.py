@@ -5,7 +5,7 @@ import math
 origin = (0, 0, 0)
 edge = (200, 200, 200)
 height = 100
-lumpNumber = 20
+lumpNumber = 4
 pointsToMove = [] # will hold spinePoints
 
 #offsetSpine variables
@@ -13,7 +13,18 @@ offsetAmount = 10
 
 #drawTube variables
 interp = True
-thickness = 5
+thickness = 10
+
+def deleteAllCurvesAndPoints():
+    # find all curves in doc that are not in locked layer
+    curves = rs.ObjectsByType(4) #4 is type for curves
+    points = rs.ObjectsByType(1) #1 is points
+    #check if any found
+    if curves or points:
+        rs.DeleteObjects(curves)
+        rs.DeleteObjects(points)
+    else:
+        print("No curves found")
 
 def generateSpine(center, spineHeight, lumps):
     #draw points and line from origin -> height
@@ -70,18 +81,32 @@ def estimatePlane(curve):
     return plane
 
 
-def drawTube(interp, curve, radius):
+def sweepShape(interp, curve, radius):
     plane = estimatePlane(curve)
     shape = rs.AddCircle(plane, radius)
     tube = rs.AddSweep1(curve, [shape])
     
     return tube 
 
-pointsToMove = generateSpine(origin, height, lumpNumber)
-offsetScaleList = createOffsetList(offsetAmount)
 
-spiralCurve = drawCurve(pointsToMove, offsetScaleList, interp)
+def drawTube( origin=[0,0,0], 
+              height=100, 
+              lumpNumber=4,
+              offsetAmount=10,
+              interp=True,
+              thickness=10):
+    points = generateSpine(origin, height, lumpNumber)
+    offsetVectors = createOffsetList(offsetAmount)
+    spiralCurve = drawCurve(points, offsetVectors, interp)
+    tube = sweepShape(interp, spiralCurve, thickness)
+    rs.CapPlanarHoles(tube)
+    
+    return tube
+    
+drawTube(origin, height, lumpNumber, offsetAmount, interp, thickness)
 
-tube = drawTube(interp, spiralCurve, thickness)
+drawTube([0, 0, 50], height, lumpNumber, offsetAmount, interp, thickness)
 
-rs.CapPlanarHoles(tube)
+
+
+deleteAllCurvesAndPoints()

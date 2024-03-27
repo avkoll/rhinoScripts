@@ -6,15 +6,17 @@ edge = (200, 200, 200)
 socketHeight = 0.75 # *IMPORTANT* socketHeight needs to be < BottomThickness in the slicer or printer will make spagheto
 baseRadius = 25
 height = 100
-numberOfFins = 36 # has to be greater than 2 or crash, higher = slower generation time but will complete.
+numberOfFins = 24 # has to be greater than 2 or crash, higher = slower generation time but will complete.
 widthScale = baseRadius * 0.1 # value is distance that fins stick out from base
+baseInterpolated = True # decide if the curve at base should be control point or interpolated
+
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
 numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
-lumpScale = 0.25 #not 0
+lumpScale = 0.1 #not 0
 twist = 90 #degree of twist in degrees
 
 isBackForth = True #do you want it to switch directions in the rotation?
@@ -31,7 +33,7 @@ def generatePosOrNeg(n, p):
             localRandom = localRandom / abs(localRandom)
             return localRandom
 
-def createBase():
+def createBase(interp=False):
     base = rs.AddCircle(origin, baseRadius)
     outerCurve = rs.OffsetCurve(base, edge, widthScale)
 
@@ -48,8 +50,12 @@ def createBase():
         pointsArray.append(oc)
 
     pointsArray.append(pointsArray[0])
-
-    wavyBase = rs.AddCurve(pointsArray)
+    
+    if interp:
+        wavyBase = rs.AddInterpCurve(pointsArray)
+    else:
+        wavyBase = rs.AddCurve(pointsArray)
+        
     rs.DeleteObjects(pointsArray)
     curvesToLoft.append(wavyBase) #add curves between top and bottom below this one and before the top is added i.e. if there ends up being a twist
     return wavyBase
@@ -61,7 +67,7 @@ def createWalls(lumpy = False, backForth = False):
 
         backForthDir = 1
         for i in range(0, numberOfLumps):
-            localLumpScale = random.uniform(0.75, 1.25) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
+            localLumpScale = random.uniform(0.85, 1.25) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
             
             if backForth:
                 backForthDir = generatePosOrNeg(-1,2)
@@ -111,7 +117,7 @@ def deleteAllCurves():
     else:
         print("No curves found")
 
-bottom = createBase()
+bottom = createBase(baseInterpolated)
 createWalls(isLumpy, isBackForth)
 loftAndCap()
 deleteAllCurves()

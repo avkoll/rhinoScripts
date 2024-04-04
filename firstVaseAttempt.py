@@ -120,6 +120,9 @@ def deleteAllCurves():
     else:
         print("No curves found")
 
+# diameter of silver socket: 42mm
+# diameter of plastic socket: 35mm
+# diameter for clip light: 32mm
 def cutHole(toCut, baseHeight):
     cylindar = rs.AddCylinder(origin, baseHeight, 21)
     toCut = rs.BooleanDifference(toCut, cylindar)

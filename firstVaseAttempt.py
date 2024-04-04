@@ -1,22 +1,23 @@
 import rhinoscriptsyntax as rs
 import random
+#import universalBase
 
 origin = (0, 0, 0)
 edge = (200, 200, 200)
 socketHeight = 0.75 # *IMPORTANT* socketHeight needs to be < BottomThickness in the slicer or printer will make spagheto
-baseRadius = 25
+baseRadius = 60 #lamp hole is 35mm wide
 height = 100
-numberOfFins = 100 # has to be greater than 2 or 12 if baseInterpolated, higher = slower generation time but will complete.
+numberOfFins = 8 # has to be greater than 2 or 12 if baseInterpolated, higher = slower generation time but will complete.
 widthScale = baseRadius * 0.1 # value is distance that fins stick out from base
-baseInterpolated = True # decide if the curve at base should be control point or interpolated
+baseInterpolated = False # decide if the curve at base should be control point or interpolated
 
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
-numberOfLumps = 8 #number of extra rings between top and bottom to create wavy effect
-lumpScale = 0.1 #not 0
+numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
+lumpScale = 0.10 #not 0
 twist = 90 #degree of twist in degrees
 
 isBackForth = True #do you want it to switch directions in the rotation?
@@ -67,7 +68,7 @@ def createWalls(lumpy = False, backForth = False):
 
         backForthDir = 1
         for i in range(0, numberOfLumps):
-            localLumpScale = random.uniform(0.85, 1.25) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
+            localLumpScale = random.uniform(0.85, 1.15) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
             
             if backForth:
                 backForthDir = generatePosOrNeg(-1,2)
@@ -104,6 +105,8 @@ def loftAndCap():
     socketBaseCutter = rs.AddCylinder([0, 0, socketHeight], [0, 0, 200], 200)
     socketBase = rs.BooleanDifference([socketBase], [socketBaseCutter], True)
     shell = rs.BooleanUnion([shell, socketBase])
+    
+    return shell
     #TODO redo above code so it fucking works...
     #truncate and generate solid from what has already been generated as shell
 
@@ -117,7 +120,16 @@ def deleteAllCurves():
     else:
         print("No curves found")
 
+def cutHole(toCut, baseHeight):
+    cylindar = rs.AddCylinder(origin, baseHeight, 21)
+    toCut = rs.BooleanDifference(toCut, cylindar)
+
+
 bottom = createBase(baseInterpolated)
 createWalls(isLumpy, isBackForth)
-loftAndCap()
+shade = loftAndCap()
+cutHole(shade, socketHeight)
+
 deleteAllCurves()
+
+#socket = universalBase.createSocket()

@@ -5,18 +5,18 @@ import random
 origin = (0, 0, 0)
 edge = (200, 200, 200)
 socketHeight = 0.75 # *IMPORTANT* socketHeight needs to be < BottomThickness in the slicer or printer will make spagheto
-baseRadius = 42 #lamp hole is 35mm wide
-height = 150
-numberOfFins = 3 # has to be greater than 2 or 12 if baseInterpolated, higher = slower generation time but will complete.
+baseRadius = 45 #lamp hole is 35mm wide
+height = 125
+numberOfFins = 20 # has to be greater than 2 or 12 if baseInterpolated, higher = slower generation time but will complete.
 widthScale = baseRadius * 0.1 # value is distance that fins stick out from base
 baseInterpolated = False # decide if the curve at base should be control point or interpolated
-isLargeBase = True # offset base so bottom is wider than original curve
+isLargeBase = False # offset base so bottom is wider than original curve
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
 
 isLumpy = True #true adds curves between top and bottom at intervals == numberOfLumps
-numberOfLumps = 6 #number of extra rings between top and bottom to create wavy effect
+numberOfLumps = 22 #number of extra rings between top and bottom to create wavy effect
 lumpScale = 0.10 #not 0
 twist = 90 #degree of twist in degrees
 
@@ -70,7 +70,7 @@ def createWalls(lumpy = False, backForth = False, largeBase = False):
 
         backForthDir = 1
         for i in range(0, numberOfLumps):
-            localLumpScale = random.uniform(0.90, 1.10) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
+            localLumpScale = random.uniform(1.00, 1.07) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
             
             if backForth:
                 backForthDir = generatePosOrNeg(-1,2)
@@ -132,7 +132,7 @@ def deleteAllCurves():
 # diameter of plastic socket: 35mm
 # diameter for clip light: 32mm
 def cutHole(toCut, baseHeight):
-    cylindar = rs.AddCylinder(origin, baseHeight, 16)
+    cylindar = rs.AddCylinder(origin, baseHeight, 22.5)
     toCut = rs.BooleanDifference(toCut, cylindar)
 
 

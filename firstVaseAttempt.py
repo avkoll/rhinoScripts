@@ -5,12 +5,12 @@ import random
 origin = (0, 0, 0)
 edge = (200, 200, 200)
 socketHeight = 0.75 # *IMPORTANT* socketHeight needs to be < BottomThickness in the slicer or printer will make spagheto
-baseRadius = 60 #lamp hole is 35mm wide
-height = 100
-numberOfFins = 8 # has to be greater than 2 or 12 if baseInterpolated, higher = slower generation time but will complete.
+baseRadius = 42 #lamp hole is 35mm wide
+height = 150
+numberOfFins = 3 # has to be greater than 2 or 12 if baseInterpolated, higher = slower generation time but will complete.
 widthScale = baseRadius * 0.1 # value is distance that fins stick out from base
 baseInterpolated = False # decide if the curve at base should be control point or interpolated
-
+isLargeBase = True # offset base so bottom is wider than original curve
 
 curvesToLoft = [] #array that will hold the curves that will be loft to create the walls of the vase
 midCurveList = [] #ay ay ay if i delete this in the createWalls function it breaks...
@@ -61,14 +61,16 @@ def createBase(interp=False):
     curvesToLoft.append(wavyBase) #add curves between top and bottom below this one and before the top is added i.e. if there ends up being a twist
     return wavyBase
 
-def createWalls(lumpy = False, backForth = False):
+def createWalls(lumpy = False, backForth = False, largeBase = False):
     midCurveList.append(curvesToLoft[0])
+    
+
     
     if lumpy == True:
 
         backForthDir = 1
         for i in range(0, numberOfLumps):
-            localLumpScale = random.uniform(0.85, 1.15) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
+            localLumpScale = random.uniform(0.90, 1.10) # this variable affects the lumpiness of the object. <1 makes it narrow to top >1 makes it funnel/lampshade like.
             
             if backForth:
                 backForthDir = generatePosOrNeg(-1,2)
@@ -87,6 +89,12 @@ def createWalls(lumpy = False, backForth = False):
         wavyTop = rs.CopyObject(curvesToLoft[0], [0, 0, height])
         rs.RotateObject(wavyTop, origin, twist)
         midCurveList.append(wavyTop)
+    
+    ## offset and replace bottom
+    #TODO standardize base size with this if statement
+    if largeBase == True:
+        standardBase = rs.AddCircle([0, 0, 0], baseRadius * 1.10)
+        midCurveList[0] = standardBase
     return
 
 def loftAndCap():
@@ -124,12 +132,14 @@ def deleteAllCurves():
 # diameter of plastic socket: 35mm
 # diameter for clip light: 32mm
 def cutHole(toCut, baseHeight):
-    cylindar = rs.AddCylinder(origin, baseHeight, 21)
+    cylindar = rs.AddCylinder(origin, baseHeight, 16)
     toCut = rs.BooleanDifference(toCut, cylindar)
 
 
+#TODO: add arch on top of shade so it is not just open but has top layer taht can be printed
+
 bottom = createBase(baseInterpolated)
-createWalls(isLumpy, isBackForth)
+createWalls(isLumpy, isBackForth, isLargeBase)
 shade = loftAndCap()
 cutHole(shade, socketHeight)
 
